@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Chargement de Google Sheet</title>
+<script src="https://d3js.org/d3.v4.js"></script>
+<link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
+<style>
+    .bar {fill: steelblue;}
+    table {width: 100%; border-collapse: collapse;}
+    th, td {border: 1px solid #dddddd; text-align: left; padding: 8px;}
+    th {background-color: #f2f2f2;}
+    tr:nth-child(even) {background-color: #f9f9f9;}
+</style>
+</head>
+<body>
+<div class="container mt-3">
+    <div>
+        <table class="table table-striped" id="tab-data">
+            <thead class="thead-dark"></thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    <div id="datavisu"></div>
+</div>
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+<script>
+const sheetURL = "https://cors-anywhere.herokuapp.com/https://docs.google.com/spreadsheets/d/e/2PACX-1vRVf-7EV1M3RPjQ2h4rb6QGSJArT9Yp_OA-AoX-h0U0fFQ6l_DDgXeOFhtj10HcH_L8ULAS2a_wAEvU/pub?output=csv";
+const proxyURL = "";
+fetch(proxyURL + sheetURL)
+    .then(response => response.text())
+    .then(csvText => Traitement(csvText))
+    .catch(error => console.error('Erreur lors de la récupération du CSV:', error));
+
+
+
+function Traitement(csvText) { // La fonction Traitement qui traitera les données CSV obtenues
+    const rows = csvText.trim().split('\n'); // Traiter le texte CSV en un tableau de lignes
+    // Sélectionner les éléments du corps et de l'en-tête de la table
+    const tbody = document.querySelector("#tab-data tbody");
+    const thead = document.querySelector("#tab-data thead");
+    // Compteurs pour chaque type de données
+    var countA = 0;
+    var countF = 0;
+    var countS = 0;
+
+    const headerCols = rows[0].split(',');// Traitement des lignes d'en-tête du CSV et insertion dans la table
+    const trHead = document.createElement('tr');
+    headerCols.forEach(col => {
+        const th = document.createElement('th');
+        th.textContent = col;
+        trHead.appendChild(th);
+    });
+    thead.appendChild(trHead);
+
+    rows.slice(1).forEach(row => {
+        const cols = row.split(',');
+        const tr = document.createElement('tr');
+
+        cols.forEach(col => {
+            if (col === "Animé") countA++;
+            else if (col === "Film") countF++;
+            else if (col == "Série") countS++;
+
+            const td = document.createElement('td');
+            if (col.trim().startsWith('http')) {
+                const img = document.createElement('img');
+                img.alt = 'Image';
+                img.width = 100;
+                const drivePattern = /drive.google.com.*?d\/(.*?)(?:\/|$)/;
+                const match = col.match(drivePattern);
+                if (match) {
+                    const fileId = match[1];
+                    img.src = `http://drive.google.com/uc?export=view&id=${fileId}`;
+                } else {
+                    img.src = col;
+                }
+                td.appendChild(img);
+            } else {
+                td.textContent = col;
+            }
+            tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+    });
+   // Création du graphique avec les données 
+    var data1 = [
+       {group: "Anime", value: countA},
+       {group: "Film", value: countF},
+       {group: "Série", value: countS}
+    ];
+
+
+    //merci à https://d3-graph-gallery.com/index.html
+    var margin = {top: 30, right: 30, bottom: 70, left: 60},
+        width = 460 - margin.left - margin.right,
+        height = 400 - margin.top - margin.bottom;
+
+    var svg = d3.select("#datavisu")
+      .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    var x = d3.scaleBand()
+      .range([ 0, width ])
+      .padding(0.2);
+    var xAxis = svg.append("g")
+      .attr("transform", "translate(0," + height + ")")
+
+    var y = d3.scaleLinear()
+      .range([ height, 0]);
+    var yAxis = svg.append("g")
+      .attr("class", "myYaxis")
+     // La fonction de mise à jour du graphique
+    function update(data) {
+        // Mise à jour des axes et des barres du graphique
+        x.domain(data.map(function(d) { return d.group; }))
+        xAxis.call(d3.axisBottom(x))
+        y.domain([0, d3.max(data, function(d) { return d.value }) ]);
+        yAxis.transition().duration(1000).call(d3.axisLeft(y));
+
+        var u = svg.selectAll("rect")
+            .data(data)
+  u
+    .enter()
+    .append("rect") 
+    .merge(u) 
+    .transition() 
+    .duration(1000)
+      .attr("x", function(d) { return x(d.group); })
+      .attr("y", function(d) { return y(d.value); })
+      .attr("width", x.bandwidth())
+      .attr("height", function(d) { return height - y(d.value); })
+      .attr("fill", "#69b3a2")
+
+  
+  u
+    .exit()
+    .remove()
+}
+
+
+update(data1) // Initialisation du graphique avec l'ensemble de données
+}
+  </script>
+    
+
+</body>
+</html>
