@@ -57,8 +57,12 @@ function Traitement(csvText) { // La fonction Traitement qui traitera les donné
         trHead.appendChild(th);
     });
     thead.appendChild(trHead);
-
+    
     rows.slice(1).forEach(row => {
+        let data = row.split(',')
+        let urlImg = data[4]
+        urlImg = urlImg.replace('open?id=','uc?id=')
+
         const cols = row.split(',');
         const tr = document.createElement('tr');
 
@@ -71,18 +75,9 @@ function Traitement(csvText) { // La fonction Traitement qui traitera les donné
             if (col.trim().startsWith('http')) {
                 const img = document.createElement('img');
                 img.alt = 'Image';
+                img.src = urlImg
                 img.width = 100;
-                const drivePattern = /drive.google.com.*?d\/(.*?)(?:\/|$)/;
-                const match = col.match(drivePattern);
-                if (match) {
-                    const fileId = match[1];
-                    //img.src = `http://drive.google.com/uc?export=view&id=${fileId}`;
-                    img.src = `http://drive.google.com/uc?id=${fileId}`;
-                } else {
-                    
-                    img.src = img.src.replace("open?id=","uc?id=");
-                    //img.src = col;
-                }
+                
                 td.appendChild(img);
             } else {
                 td.textContent = col;
