@@ -31,7 +31,7 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
 <script>
 const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRVf-7EV1M3RPjQ2h4rb6QGSJArT9Yp_OA-AoX-h0U0fFQ6l_DDgXeOFhtj10HcH_L8ULAS2a_wAEvU/pub?output=csv";
-//const proxyURL = "https://cors-anywhere.herokuapp.com/";
+const proxyURL = "https://cors-anywhere.herokuapp.com/";
 fetch(proxyURL + sheetURL)
     .then(response => response.text())
     .then(csvText => Traitement(csvText))
