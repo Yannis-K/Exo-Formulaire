@@ -79,7 +79,9 @@ function Traitement(csvText) { // La fonction Traitement qui traitera les donné
                     //img.src = `http://drive.google.com/uc?export=view&id=${fileId}`;
                     img.src = `http://drive.google.com/uc?id=${fileId}`;
                 } else {
-                    img.src = col;
+                    
+                    img.src = img.src.replace("open?id=","uc?id=");
+                    //img.src = col;
                 }
                 td.appendChild(img);
             } else {
