@@ -85,6 +85,7 @@
 </head>
 
 <body>
+<<<<<<< HEAD
     <p>Si rien ne s'affcihe lancer la démo de Cors Anywhere <a href="https://cors-anywhere.herokuapp.com/corsdemo">lien</a></p>
     <div class="navbar">
         <a href="./index.html">Accueil</a>
@@ -140,6 +141,78 @@
                     return `https://drive.google.com/uc?id=${id}&export=download`;  // Construire l'URL pour l'image
                 })
                 .attr('alt', 'Image');  // Attribut alt pour l'accessibilité
+=======
+
+
+<p>Si rien ne s'affcihe lancer la démo de Cors Anywhere <a href="https://cors-anywhere.herokuapp.com/corsdemo">lien</a></p>    
+<div class="container mt-3">
+    <div>
+        <table class="table table-striped" id="tab-data">
+            <thead class="thead-dark"></thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    <h1>Répartition des Divertissement</h1>
+    <div id="datavisu"></div>
+</div>
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+<script>
+const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRVf-7EV1M3RPjQ2h4rb6QGSJArT9Yp_OA-AoX-h0U0fFQ6l_DDgXeOFhtj10HcH_L8ULAS2a_wAEvU/pub?output=csv";
+const proxyURL = "https://cors-anywhere.herokuapp.com/";
+fetch(proxyURL + sheetURL)
+    .then(response => response.text())
+    .then(csvText => Traitement(csvText))
+    .catch(error => console.error('Erreur lors de la récupération du CSV:', error));
+
+
+
+function Traitement(csvText) { // La fonction Traitement qui traitera les données CSV obtenues
+    const rows = csvText.trim().split('\n'); // Traiter le texte CSV en un tableau de lignes
+    // Sélectionner les éléments du corps et de l'en-tête de la table
+    const tbody = document.querySelector("#tab-data tbody");
+    const thead = document.querySelector("#tab-data thead");
+    // Compteurs pour chaque type de données
+    var countA = 0;
+    var countF = 0;
+    var countS = 0;
+
+    const headerCols = rows[0].split(',');// Traitement des lignes d'en-tête du CSV et insertion dans la table
+    const trHead = document.createElement('tr');
+    headerCols.forEach(col => {
+        const th = document.createElement('th');
+        th.textContent = col;
+        trHead.appendChild(th);
+    });
+    thead.appendChild(trHead);
+    
+    rows.slice(1).forEach(row => {
+        let data = row.split(',')
+        let urlImg = data[4]
+        urlImg = urlImg.replace('open?id=','uc?id=')
+
+        const cols = row.split(',');
+        const tr = document.createElement('tr');
+
+        cols.forEach(col => {
+            if (col === "Animé") countA++;
+            else if (col === "Film") countF++;
+            else if (col == "Série") countS++;
+
+            const td = document.createElement('td');
+            if (col.trim().startsWith('http')) {
+                const img = document.createElement('img');
+                img.alt = 'Image';
+                img.src = urlImg
+                img.width = 100;
+                
+                td.appendChild(img);
+            } else {
+                td.textContent = col;
+            }
+            tr.appendChild(td);
+>>>>>>> f6c5147739fcdbbb67a41082855b49a42913f838
         });
 
 
@@ -148,5 +221,8 @@
         
     </script>
 </body>
+<<<<<<< HEAD
 
+=======
+>>>>>>> f6c5147739fcdbbb67a41082855b49a42913f838
 </html>
