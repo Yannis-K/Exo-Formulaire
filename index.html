@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 
 <head>
     <meta charset="UTF-8">
@@ -19,7 +19,7 @@
             justify-content: space-between;
         }
 
-        .exo {
+        .divs {
             background-color: #fff;
             border: 1px solid #e4e4e4;
             padding: 20px;
@@ -33,21 +33,21 @@
             align-items: start;
         }
 
-        .exo .content ul {
+        .divs .content ul {
             list-style-type: none;
             padding-left: 0;
         }
 
-        .exo .content li:not(:last-child) {
+        .divs .content li:not(:last-child) {
             margin-bottom: 10px;
         }
 
-        .exo .image {
+        .divs .image {
             width: 30%;
             text-align: right;
         }
 
-        .exo .image img {
+        .divs .image img {
             width: 100%;
             max-width: 200px;
             height: auto;
@@ -55,7 +55,7 @@
         }
 
         .navbar {
-            background-color: #2c3e50;
+            background-color: #205992;
             overflow: hidden;
             padding: 10px 20px;
             box-shadow: 0px 3px 10px rgba(0, 0, 0, 0.1);
@@ -85,7 +85,8 @@
 </head>
 
 <body>
-      <p>Si rien ne s'affcihe lancer la démo de Cors Anywhere <a href="https://cors-anywhere.herokuapp.com/corsdemo">lien</a></p>
+
+    <p>Si rien ne s'affcihe lancer la démo de Cors Anywhere <a href="https://cors-anywhere.herokuapp.com/corsdemo">lien</a></p>
     <div class="navbar">
         <a href="./index.html">Accueil</a>
         <a href="./graph.html">Graphique</a>
@@ -101,11 +102,11 @@
         d3.csv(url).then(data => {
             // Sélectionner l'élément avec l'ID "main", lier les données, et créer des divs pour chaque entrée 
             let divs = d3.select('#main')
-                        .selectAll('div.exo')
+                        .selectAll('div.divs')
                         .data(data)
                         .enter()
                         .append('div')
-                        .attr('class', 'exo');  // Ajout de la classe 'exo' pour le style 
+                        .attr('class', 'divs');  // Ajout de la classe 'divs' pour le style 
 
             // Pour chaque div créé, ajouter un conteneur 
             let contentList = divs.append('div')
@@ -140,7 +141,7 @@
                     return `https://drive.google.com/uc?id=${id}&export=download`;  // Construire l'URL pour l'image
                 })
                 .attr('alt', 'Image');  // Attribut alt pour l'accessibilité
-             });
+        });
 
 
         
