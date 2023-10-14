@@ -1,153 +1,152 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<title>Chargement de Google Sheet</title>
-<script src="https://d3js.org/d3.v4.js"></script>
-<link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
-<style>
-    .bar {fill: steelblue;}
-    table {width: 100%; border-collapse: collapse;}
-    th, td {border: 1px solid #dddddd; text-align: left; padding: 8px;}
-    th {background-color: #f2f2f2;}
-    tr:nth-child(even) {background-color: #f9f9f9;}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THYP 23-24 exercice 1</title>
+    <script src="assets/js/d3.v7.min.js"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+
+        #main {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+
+        .exo {
+            background-color: #fff;
+            border: 1px solid #e4e4e4;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            width: 30%;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+        }
+
+        .exo .content ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .exo .content li:not(:last-child) {
+            margin-bottom: 10px;
+        }
+
+        .exo .image {
+            width: 30%;
+            text-align: right;
+        }
+
+        .exo .image img {
+            width: 100%;
+            max-width: 200px;
+            height: auto;
+            border-radius: 5px;
+        }
+
+        .navbar {
+            background-color: #2c3e50;
+            overflow: hidden;
+            padding: 10px 20px;
+            box-shadow: 0px 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar a {
+            float: left;
+            display: block;
+            color: white;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .navbar a:hover {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .navbar a.active {
+            background-color: #2980b9;
+            color: white;
+        }
+
+    </style>
 </head>
+
 <body>
-<div class="container mt-3">
-    <div>
-        <table class="table table-striped" id="tab-data">
-            <thead class="thead-dark"></thead>
-            <tbody></tbody>
-        </table>
+    <p>Si rien ne s'affcihe lancer la démo de Cors Anywhere <a href="https://cors-anywhere.herokuapp.com/corsdemo">lien</a></p>
+    <div class="navbar">
+        <a href="./index.html">Accueil</a>
+        <a href="./graph.html">Graphique</a>
     </div>
-    <div id="datavisu"></div>
-</div>
-<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
-<script>
-const sheetURL = "https://cors-anywhere.herokuapp.com/https://docs.google.com/spreadsheets/d/e/2PACX-1vRVf-7EV1M3RPjQ2h4rb6QGSJArT9Yp_OA-AoX-h0U0fFQ6l_DDgXeOFhtj10HcH_L8ULAS2a_wAEvU/pub?output=csv";
-const proxyURL = "";
-fetch(proxyURL + sheetURL)
-    .then(response => response.text())
-    .then(csvText => Traitement(csvText))
-    .catch(error => console.error('Erreur lors de la récupération du CSV:', error));
+    <div id="main"></div>
 
+    <script>
+        let corsAnywhere = "https://cors-anywhere.herokuapp.com/";
+        let url2 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRVf-7EV1M3RPjQ2h4rb6QGSJArT9Yp_OA-AoX-h0U0fFQ6l_DDgXeOFhtj10HcH_L8ULAS2a_wAEvU/pub?output=csv";
+        let url = corsAnywhere + url2;
 
+        // Charger les données CSV depuis une URL
+        d3.csv(url).then(data => {
+            // Sélectionner l'élément avec l'ID "main", lier les données, et créer des divs pour chaque entrée 
+            let divs = d3.select('#main')
+                        .selectAll('div.exo')
+                        .data(data)
+                        .enter()
+                        .append('div')
+                        .attr('class', 'exo');  // Ajout de la classe 'exo' pour le style 
 
-function Traitement(csvText) { // La fonction Traitement qui traitera les données CSV obtenues
-    const rows = csvText.trim().split('\n'); // Traiter le texte CSV en un tableau de lignes
-    // Sélectionner les éléments du corps et de l'en-tête de la table
-    const tbody = document.querySelector("#tab-data tbody");
-    const thead = document.querySelector("#tab-data thead");
-    // Compteurs pour chaque type de données
-    var countA = 0;
-    var countF = 0;
-    var countS = 0;
+            // Pour chaque div créé, ajouter un conteneur 
+            let contentList = divs.append('div')
+                                .attr('class', 'content')  // Ajout de la classe 'content' pour le style 
+                                .append('ul');  // Utilisation d'une liste pour structurer le contenu
 
-    const headerCols = rows[0].split(',');// Traitement des lignes d'en-tête du CSV et insertion dans la table
-    const trHead = document.createElement('tr');
-    headerCols.forEach(col => {
-        const th = document.createElement('th');
-        th.textContent = col;
-        trHead.appendChild(th);
-    });
-    thead.appendChild(trHead);
+            // Ajouter le nom 
+            contentList.append('li')
+                    .attr('class', 'name')  // Classe 'name' pour le style 
+                    .append('h1')
+                    .text(d => d['Nom']);
 
-    rows.slice(1).forEach(row => {
-        const cols = row.split(',');
-        const tr = document.createElement('tr');
+            // Ajouter l'âge 
+            contentList.append('li')
+                    .attr('class', 'age')  // Ajout de la classe 'age' pour le style 
+                    .text(d => `Age: ${d['Age']}`);
 
-        cols.forEach(col => {
-            if (col === "Animé") countA++;
-            else if (col === "Film") countF++;
-            else if (col == "Série") countS++;
+            // Ajouter le divertissement favori 
+            contentList.append('li')
+                    .attr('class', 'divertissement')  // Ajout de la classe 'divertissement' pour le style 
+                    .text(d => `Divertissement favori: ${d['Divertissement favori']}`);
 
-            const td = document.createElement('td');
-            if (col.trim().startsWith('http')) {
-                const img = document.createElement('img');
-                img.alt = 'Image';
-                img.width = 100;
-                const drivePattern = /drive.google.com.*?d\/(.*?)(?:\/|$)/;
-                const match = col.match(drivePattern);
-                if (match) {
-                    const fileId = match[1];
-                    img.src = `http://drive.google.com/uc?export=view&id=${fileId}`;
-                } else {
-                    img.src = col;
-                }
-                td.appendChild(img);
-            } else {
-                td.textContent = col;
-            }
-            tr.appendChild(td);
+            // Ajouter une image à la div basée sur l'URL du drive
+            divs.append('div')
+                .attr('class', 'image')  // Ajout de la classe 'image' pour le style 
+                .append('img')
+                .attr('src', function (d) {
+                    // Extraire l'ID de l'image depuis l'URL
+                    const url = new URL(d['Inséré votre œuvre préféré']);
+                    const urlParam = new URLSearchParams(url.search);
+                    const id = urlParam.get('id');
+                    return `https://drive.google.com/uc?id=${id}&export=download`;  // Construire l'URL pour l'image
+                })
+                .attr('alt', 'Image');  // Attribut alt pour l'accessibilité
         });
-        tbody.appendChild(tr);
-    });
-   // Création du graphique avec les données 
-    var data1 = [
-       {group: "Anime", value: countA},
-       {group: "Film", value: countF},
-       {group: "Série", value: countS}
-    ];
 
 
-    //merci à https://d3-graph-gallery.com/index.html
-    var margin = {top: 30, right: 30, bottom: 70, left: 60},
-        width = 460 - margin.left - margin.right,
-        height = 400 - margin.top - margin.bottom;
+        
 
-    var svg = d3.select("#datavisu")
-      .append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
-      .append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-    var x = d3.scaleBand()
-      .range([ 0, width ])
-      .padding(0.2);
-    var xAxis = svg.append("g")
-      .attr("transform", "translate(0," + height + ")")
-
-    var y = d3.scaleLinear()
-      .range([ height, 0]);
-    var yAxis = svg.append("g")
-      .attr("class", "myYaxis")
-     // La fonction de mise à jour du graphique
-    function update(data) {
-        // Mise à jour des axes et des barres du graphique
-        x.domain(data.map(function(d) { return d.group; }))
-        xAxis.call(d3.axisBottom(x))
-        y.domain([0, d3.max(data, function(d) { return d.value }) ]);
-        yAxis.transition().duration(1000).call(d3.axisLeft(y));
-
-        var u = svg.selectAll("rect")
-            .data(data)
-  u
-    .enter()
-    .append("rect") 
-    .merge(u) 
-    .transition() 
-    .duration(1000)
-      .attr("x", function(d) { return x(d.group); })
-      .attr("y", function(d) { return y(d.value); })
-      .attr("width", x.bandwidth())
-      .attr("height", function(d) { return height - y(d.value); })
-      .attr("fill", "#69b3a2")
-
-  
-  u
-    .exit()
-    .remove()
-}
-
-
-update(data1) // Initialisation du graphique avec l'ensemble de données
-}
-  </script>
-    
-
+        
+    </script>
 </body>
+
 </html>
