@@ -34,12 +34,12 @@
             align-items: start;
         }
 
-        .divs .content ul {
+        .divs .contenu ul {
             list-style-type: none;
             padding-left: 0;
         }
 
-        .divs .content li:not(:last-child) {
+        .divs .contenu li:not(:last-child) {
             margin-bottom: 10px;
         }
 
@@ -82,6 +82,27 @@
             color: white;
         }
 
+        .boutons-filtre {
+            display: flex;
+            justify-content: center;
+            margin: 10px 0;
+        }
+
+        .boutons-filtre button {
+            margin: 0 10px;
+            padding: 5px 15px;
+            cursor: pointer;
+            background-color: #205992;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .boutons-filtre button:hover {
+            background-color: #3498db;
+        }
+
     </style>
 </head>
 
@@ -92,6 +113,15 @@
         <a href="./index.html">Accueil</a>
         <a href="./graph.html">Graphique</a>
     </div>
+
+    <div class="boutons-filtre">
+        <button onclick="filtreDivertissement('Tous')">Tous</button>
+        <button onclick="filtreDivertissement('Film')">Film</button>
+        <button onclick="filtreDivertissement('Animé')">Animé</button>
+        <button onclick="filtreDivertissement('Série')">Série</button>
+    </div>
+
+
     <div id="main"></div>
 
     <script>
@@ -99,53 +129,79 @@
         let url2 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRVf-7EV1M3RPjQ2h4rb6QGSJArT9Yp_OA-AoX-h0U0fFQ6l_DDgXeOFhtj10HcH_L8ULAS2a_wAEvU/pub?output=csv";
         let url = corsAnywhere + url2;
 
-        // Charger les données CSV depuis une URL
-        d3.csv(url).then(data => {
-            // Sélectionner l'élément avec l'ID "main", lier les données, et créer des divs pour chaque entrée 
-            let divs = d3.select('#main')
-                        .selectAll('div.divs')
-                        .data(data)
-                        .enter()
-                        .append('div')
-                        .attr('class', 'divs');  // Ajout de la classe 'divs' pour le style 
 
-            // Pour chaque div créé, ajouter un conteneur 
-            let contentList = divs.append('div')
-                                .attr('class', 'content')  // Ajout de la classe 'content' pour le style 
-                                .append('ul');  // Utilisation d'une liste pour structurer le contenu
+        let data = [];
 
-            // Ajouter le nom 
-            contentList.append('li')
-                    .attr('class', 'name')  // Classe 'name' pour le style 
-                    .append('h1')
-                    .text(d => d['Nom']);
+        function filtreDivertissement(type) {
+            let filtreData = [];
+            // Si l'utilisateur a choisi 'Tous', aucune filtration n'est nécessaire, on utilise donc l'ensemble des données
+            if (type === 'Tous') {
+                filtreData = data;
+            } else {
+                // Si un type spécifique est choisi, filtre sur les données pour ne conserver que celles correspondant à ce type
+                filtreData = data.filter(d => d['Divertissement favori'] === type);
+            }
+            
+            AfficheData(filtreData);
+        }
+        // Fonction AfficheData avec les données filtrées pour mettre à jour l'affichage
+        function AfficheData(dataAfficher) {
+            // Supprime toutes les divs existantes
+            d3.select('#main').selectAll('div.divs').remove();
+            // Charger les données CSV depuis une URL
+            d3.csv(url).then(data => {
+                // Sélectionner l'élément avec l'ID "main", lier les données, et créer des divs pour chaque entrée 
+                let divs = d3.select('#main')
+                            .selectAll('div.divs')
+                            .data(dataAfficher)
+                            .enter()
+                            .append('div')
+                            .attr('class', 'divs');  // Ajout de la classe 'divs' pour le style 
 
-            // Ajouter l'âge 
-            contentList.append('li')
-                    .attr('class', 'age')  // Ajout de la classe 'age' pour le style 
-                    .text(d => `Age: ${d['Age']}`);
+                // Pour chaque div créé, ajouter un conteneur 
+                let contenu = divs.append('div')
+                                    .attr('class', 'contenu')  // Ajout de la classe 'contenu' pour le style 
+                                    .append('ul');  // Utilisation d'une liste pour structurer le contenu
 
-            // Ajouter le divertissement favori 
-            contentList.append('li')
-                    .attr('class', 'divertissement')  // Ajout de la classe 'divertissement' pour le style 
-                    .text(d => `Divertissement favori: ${d['Divertissement favori']}`);
+                // Ajouter le nom 
+                contenu.append('li')
+                        .attr('class', 'nom')  // Classe 'nom' pour le style 
+                        .append('h1')
+                        .text(d => d['Nom']);
 
-            // Ajouter une image à la div basée sur l'URL du drive
-            divs.append('div')
-                .attr('class', 'image')  // Ajout de la classe 'image' pour le style 
-                .append('img')
-                .attr('src', function (d) {
-                    // Extraire l'ID de l'image depuis l'URL
-                    const url = new URL(d['Inséré votre œuvre préféré']);
-                    const urlParam = new URLSearchParams(url.search);
-                    const id = urlParam.get('id');
-                    return `https://drive.google.com/uc?id=${id}&export=download`;  // Construire l'URL pour l'image
-                })
-                .attr('alt', 'Image');  // Attribut alt pour l'accessibilité
+                // Ajouter l'âge 
+                contenu.append('li')
+                        .attr('class', 'age')  // Ajout de la classe 'age' pour le style 
+                        .text(d => `Age: ${d['Age']}`);
+
+                // Ajouter le divertissement favori 
+                contenu.append('li')
+                        .attr('class', 'divertissement')  // Ajout de la classe 'divertissement' pour le style 
+                        .text(d => `Divertissement favori: ${d['Divertissement favori']}`);
+
+                // Ajouter une image à la div basée sur l'URL du drive
+                divs.append('div')
+                    .attr('class', 'image')  // Ajout de la classe 'image' pour le style 
+                    .append('img')
+                    .attr('src', function (d) {
+                        // Extraire l'ID de l'image depuis l'URL
+                        const url = new URL(d['Inséré votre œuvre préféré']);
+                        const urlParam = new URLSearchParams(url.search);
+                        const id = urlParam.get('id');
+                        return `https://drive.google.com/uc?id=${id}&export=download`;  // Construire l'URL pour l'image
+                    })
+                    .attr('alt', 'Image');  
+            });
+
+
+        }
+        // Chargement des données CSV depuis l'URL spécifiée
+        d3.csv(url).then(dataCharge => {
+            // Chargement des données, assignées à la variable 'data'
+            data = dataCharge;
+            // Affichage par défaut sans filtre
+            AfficheData(data);
         });
-
-
-        
 
         
     </script>
